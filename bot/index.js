@@ -241,6 +241,11 @@ client.on('messageCreate', async (message) => {
 
         const score = Number(p.score).toFixed(1);
 
+        const member = message.guild.members.cache.get(message.author.id);
+        if (member) {
+          await updateRole(member, score);
+        }
+
         return noUnit
           ? `${medal} ${name} — **${score}**`
           : `${medal} ${name} — **${score} pts**`;
