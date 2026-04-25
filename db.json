@@ -1,0 +1,423 @@
+{
+  "players": [
+    {
+      "id": "discord_111",
+      "nom": "Thorgrim",
+      "kills": 42,
+      "deaths": 5,
+      "scoreGlobal": 1850,
+      "exploration": 65,
+      "bosses": [
+        {
+          "nom": "Eikthyr",
+          "kills": 3
+        },
+        {
+          "nom": "The Elder",
+          "kills": 1
+        },
+        {
+          "nom": "Bonemass",
+          "kills": 1
+        }
+      ],
+      "skills": [
+        {
+          "nom": "Swords",
+          "niveau": 18
+        },
+        {
+          "nom": "Axes",
+          "niveau": 15
+        },
+        {
+          "nom": "Blocking",
+          "niveau": 12
+        },
+        {
+          "nom": "Fishing",
+          "niveau": 6
+        }
+      ],
+      "fish": [
+        {
+          "nom": "Perche",
+          "rareté": 1,
+          "quantité": 0,
+          "qualité": 2
+        },
+        {
+          "nom": "Tetra",
+          "rareté": 3,
+          "quantité": 0,
+          "qualité": 4
+        }
+      ],
+      "trophies": [
+        {
+          "nom": "Deer",
+          "obtenu": true
+        },
+        {
+          "nom": "Boar",
+          "obtenu": true
+        }
+      ],
+      "maison": [
+        "Thorgrim",
+        "Bjorn"
+      ]
+    },
+    {
+      "id": "discord_222",
+      "nom": "Eirik",
+      "kills": 28,
+      "deaths": 12,
+      "scoreGlobal": 1320,
+      "exploration": 40,
+      "bosses": [
+        {
+          "nom": "Eikthyr",
+          "kills": 2
+        },
+        {
+          "nom": "The Elder",
+          "kills": 1
+        }
+      ],
+      "skills": [
+        {
+          "nom": "Swords",
+          "niveau": 12
+        },
+        {
+          "nom": "Bows",
+          "niveau": 14
+        },
+        {
+          "nom": "Axes",
+          "niveau": 10
+        },
+        {
+          "nom": "Fishing",
+          "niveau": 4
+        }
+      ],
+      "fish": [
+        {
+          "nom": "Brochet",
+          "rareté": 1,
+          "quantité": 6,
+          "qualité": 1
+        }
+      ],
+      "trophies": [
+        {
+          "nom": "Deer",
+          "obtenu": true
+        }
+      ],
+      "maison": [
+        "Eirik"
+      ]
+    },
+    {
+      "id": "discord_333",
+      "nom": "Lagertha",
+      "kills": 60,
+      "deaths": 2,
+      "scoreGlobal": 2200,
+      "exploration": 80,
+      "bosses": [
+        {
+          "nom": "Eikthyr",
+          "kills": 4
+        },
+        {
+          "nom": "The Elder",
+          "kills": 2
+        },
+        {
+          "nom": "Bonemass",
+          "kills": 2
+        },
+        {
+          "nom": "Moder",
+          "kills": 1
+        }
+      ],
+      "skills": [
+        {
+          "nom": "Swords",
+          "niveau": 22
+        },
+        {
+          "nom": "Axes",
+          "niveau": 20
+        },
+        {
+          "nom": "Bows",
+          "niveau": 18
+        },
+        {
+          "nom": "Fishing",
+          "niveau": 8
+        }
+      ],
+      "fish": [
+        {
+          "nom": "Saumon du Nord",
+          "rareté": 3,
+          "quantité": 3,
+          "qualité": 5
+        },
+        {
+          "nom": "Poisson-lanterne",
+          "rareté": 4,
+          "quantité": 1,
+          "qualité": 4
+        }
+      ],
+      "trophies": [
+        {
+          "nom": "Deer",
+          "obtenu": true
+        },
+        {
+          "nom": "Boar",
+          "obtenu": true
+        },
+        {
+          "nom": "Troll",
+          "obtenu": true
+        }
+      ],
+      "maison": [
+        "Lagertha"
+      ]
+    },
+    {
+      "id": "371254049426898945",
+      "nom": "guenole",
+      "kills": 0,
+      "deaths": 0,
+      "scoreGlobal": 0,
+      "exploration": 0,
+      "bosses": [],
+      "skills": [
+        {
+          "nom": "Swords",
+          "niveau": 1
+        },
+        {
+          "nom": "Knives",
+          "niveau": 1
+        },
+        {
+          "nom": "Axes",
+          "niveau": 1
+        },
+        {
+          "nom": "Maces",
+          "niveau": 1
+        },
+        {
+          "nom": "Polearms",
+          "niveau": 1
+        },
+        {
+          "nom": "Blocking",
+          "niveau": 1
+        },
+        {
+          "nom": "Bows",
+          "niveau": 1
+        },
+        {
+          "nom": "Unarmed",
+          "niveau": 1
+        },
+        {
+          "nom": "Fishing",
+          "niveau": 1
+        }
+      ],
+      "fish": [],
+      "trophies": [
+        {
+          "nom": "Eikthyr",
+          "obtenu": false
+        },
+        {
+          "nom": "The Elder",
+          "obtenu": false
+        },
+        {
+          "nom": "Bonemass",
+          "obtenu": false
+        },
+        {
+          "nom": "Moder",
+          "obtenu": false
+        },
+        {
+          "nom": "Yagluth",
+          "obtenu": false
+        },
+        {
+          "nom": "The Queen",
+          "obtenu": false
+        },
+        {
+          "nom": "Fader",
+          "obtenu": false
+        },
+        {
+          "nom": "Greydwarf",
+          "obtenu": false
+        },
+        {
+          "nom": "Greydwarf Brute",
+          "obtenu": false
+        },
+        {
+          "nom": "Greydwarf Shaman",
+          "obtenu": false
+        },
+        {
+          "nom": "Boar",
+          "obtenu": false
+        },
+        {
+          "nom": "Deer",
+          "obtenu": true
+        },
+        {
+          "nom": "Neck",
+          "obtenu": false
+        },
+        {
+          "nom": "Troll",
+          "obtenu": false
+        },
+        {
+          "nom": "Draugr",
+          "obtenu": false
+        },
+        {
+          "nom": "Draugr Elite",
+          "obtenu": false
+        },
+        {
+          "nom": "Skeleton",
+          "obtenu": false
+        },
+        {
+          "nom": "Blob",
+          "obtenu": false
+        },
+        {
+          "nom": "Ooze",
+          "obtenu": false
+        },
+        {
+          "nom": "Wraith",
+          "obtenu": false
+        },
+        {
+          "nom": "Leech",
+          "obtenu": false
+        },
+        {
+          "nom": "Abomination",
+          "obtenu": false
+        },
+        {
+          "nom": "Wolf",
+          "obtenu": false
+        },
+        {
+          "nom": "Fenring",
+          "obtenu": false
+        },
+        {
+          "nom": "Ulv",
+          "obtenu": false
+        },
+        {
+          "nom": "Stone Golem",
+          "obtenu": false
+        },
+        {
+          "nom": "Drake",
+          "obtenu": false
+        },
+        {
+          "nom": "Fuling",
+          "obtenu": false
+        },
+        {
+          "nom": "Fuling Berserker",
+          "obtenu": false
+        },
+        {
+          "nom": "Fuling Shaman",
+          "obtenu": false
+        },
+        {
+          "nom": "Deathsquito",
+          "obtenu": false
+        },
+        {
+          "nom": "Lox",
+          "obtenu": false
+        },
+        {
+          "nom": "Growth",
+          "obtenu": false
+        },
+        {
+          "nom": "Seeker",
+          "obtenu": false
+        },
+        {
+          "nom": "Seeker Soldier",
+          "obtenu": false
+        },
+        {
+          "nom": "Seeker Brood",
+          "obtenu": false
+        },
+        {
+          "nom": "Gjall",
+          "obtenu": false
+        },
+        {
+          "nom": "Tick",
+          "obtenu": false
+        },
+        {
+          "nom": "Dvergr Rogue",
+          "obtenu": false
+        },
+        {
+          "nom": "Dvergr Mage",
+          "obtenu": false
+        },
+        {
+          "nom": "Dvergr Guard",
+          "obtenu": false
+        },
+        {
+          "nom": "Serpent",
+          "obtenu": false
+        },
+        {
+          "nom": "Leviathan",
+          "obtenu": false
+        }
+      ],
+      "maison": []
+    }
+  ]
+}
