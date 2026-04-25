@@ -227,6 +227,16 @@ client.on('messageCreate', async (message) => {
       axios.get(`${API}/leaderboard/exploration`)
     ]);
 
+    const member = message.guild.members.cache.get(id);
+
+    if (member) {
+      // ⚠️ on récupère le score GLOBAL du joueur
+      const playerRes = await axios.get(`${API}/${id}`);
+      const score = playerRes.data.stats.scoreGlobal;
+
+      await updateRole(member, score);
+    }
+
     const format = (data, noUnit = false) => {
       return data.data.map((p, i) => {
 
@@ -240,11 +250,6 @@ client.on('messageCreate', async (message) => {
         const name = isMe ? `**${p.nom}**` : p.nom;
 
         const score = Number(p.score).toFixed(1);
-
-        const member = message.guild.members.cache.get(message.author.id);
-        if (member) {
-          await updateRole(member, score);
-        }
 
         return noUnit
           ? `${medal} ${name} — **${score}**`
@@ -292,7 +297,7 @@ client.on('messageCreate', async (message) => {
       .setTimestamp();
 
     return message.channel.send({ embeds: [embed] });
-}
+  }
 
     /* =========================
         👤 PROFIL
