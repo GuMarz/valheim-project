@@ -7,7 +7,7 @@ const {
 } = require('discord.js');
 
 const axios = require('axios');
-const { BOSSES, SKILLS, FISH, TROPHIES, TRANSLATIONS, FISH_RARITY, FISH_QUALITY } = require('../api/data/constants');
+const { BOSSES, SKILLS, FISH, TROPHIES, TRANSLATIONS, FISH_RARITY, FISH_QUALITY, ROLE_IDS } = require('../api/data/constants');
 const { TOKEN } = require('../token'); // 🔐 token séparé pour sécurité
 
 const client = new Client({
@@ -119,21 +119,40 @@ async function updateRole(member, score) {
 
   if (!roleId) return;
 
+  // 🔒 sécurité : ne pas toucher au propriétaire
+  if (member.id === member.guild.ownerId) {
+    console.log("❌ Impossible de modifier le propriétaire");
+    return;
+  }
+
+  // 🔒 sécurité : vérifier si modifiable
+  if (!member.manageable) {
+    console.log("❌ Membre non modifiable :", member.user.tag);
+    return;
+  }
+
   const allRoleIds = Object.values(ROLE_IDS);
 
   try {
-    // ✅ seulement si le joueur n'a pas déjà le bon rôle
-    if (!member.roles.cache.has(roleId)) {
+    const currentRoles = member.roles.cache;
 
-      // ❌ enlève tous les rôles de progression
-      await member.roles.remove(allRoleIds);
+    // ✅ récupérer uniquement les rôles à enlever (qu'il possède)
+    const rolesToRemove = allRoleIds.filter(id => currentRoles.has(id));
 
-      // ✅ ajoute le bon rôle
+    // ✅ enlever seulement si nécessaire
+    if (rolesToRemove.length > 0) {
+      await member.roles.remove(rolesToRemove);
+    }
+
+    // ✅ ajouter seulement si pas déjà présent
+    if (!currentRoles.has(roleId)) {
       await member.roles.add(roleId);
     }
 
+    console.log(`✅ Rôle mis à jour pour ${member.user.tag} → ${title}`);
+
   } catch (err) {
-    console.error("Erreur rôle :", err);
+    console.error("❌ Erreur rôle :", err);
   }
 }
 
