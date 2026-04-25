@@ -233,4 +233,14 @@ const TRANSLATIONS = {
   "Leviathan": "Léviathan"
 };
 
-module.exports = { BOSS_POINTS, FISH_RARITY, WARRIOR_SKILLS, BOSSES, SKILLS, FISH, TROPHIES, TROPHY_POINTS, TRANSLATIONS, FISH_QUALITY };
+const ROLE_IDS = {
+  "👑 Légende des mers": "1497706770028691597",
+  "⚔️ Héros des fjords": "1497706556924629042",
+  "🐉 Tueur de monstres": "1497705218421297322",
+  "🛡️ Guerrier confirmé": "1497705078252109904",
+  "🎣 Chasseur expérimenté": "1497704909175394434",
+  "🌿 Aventurier": "1497703327495094354",
+  "🪵 Villageois": "1497633111490695280"
+};
+
+module.exports = { BOSS_POINTS, FISH_RARITY, WARRIOR_SKILLS, BOSSES, SKILLS, FISH, TROPHIES, TROPHY_POINTS, TRANSLATIONS, FISH_QUALITY, ROLE_IDS };

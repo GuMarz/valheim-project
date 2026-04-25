@@ -89,11 +89,13 @@ function getNameDecoration(score, name) {
 }
 
 function getBackgroundColor(score) {
-  if (score >= 2000) return 0xFFD700; // or
-  if (score >= 1500) return 0xFF4500; // rouge légendaire
-  if (score >= 1000) return 0x8A2BE2; // violet
-  if (score >= 500) return 0x1E90FF;  // bleu
-  return 0x228B22; // vert débutant
+  if (score >= 2000) return 0xFFD700;
+  if (score >= 1500) return 0xFF4500;
+  if (score >= 1000) return 0x8A2BE2;
+  if (score >= 750) return 0x1E90FF;
+  if (score >= 500) return 0x32CD32;
+  if (score >= 250) return 0x20B2AA;
+  return 0xA9A9A9;
 }
 
 async function ensurePlayer(message) {
@@ -108,6 +110,30 @@ async function ensurePlayer(message) {
         nom: message.author.username
       });
     }
+  }
+}
+
+async function updateRole(member, score) {
+  const title = getTitle(score);
+  const roleId = ROLE_IDS[title];
+
+  if (!roleId) return;
+
+  const allRoleIds = Object.values(ROLE_IDS);
+
+  try {
+    // ✅ seulement si le joueur n'a pas déjà le bon rôle
+    if (!member.roles.cache.has(roleId)) {
+
+      // ❌ enlève tous les rôles de progression
+      await member.roles.remove(allRoleIds);
+
+      // ✅ ajoute le bon rôle
+      await member.roles.add(roleId);
+    }
+
+  } catch (err) {
+    console.error("Erreur rôle :", err);
   }
 }
 
@@ -257,6 +283,11 @@ if (content === '!pf') {
   const title = getTitle(score);
   const name = getNameDecoration(score, p.nom);
   const color = getBackgroundColor(score);
+
+  const member = message.guild.members.cache.get(message.author.id);
+  if (member) {
+    await updateRole(member, score);
+  }
 
   const embed = new EmbedBuilder()
     .setColor(color)
