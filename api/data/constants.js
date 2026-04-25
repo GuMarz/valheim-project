@@ -23,6 +23,27 @@ const FISH_RARITY = {
   "Magmafish": 4
 };
 
+const FISH_QUALITY = {
+
+  // 🟢 Type 1 (max 13)
+  "Perche": 13,
+  "Brochet": 13,
+  "Tetra": 13,
+  "Poisson-troll": 13,
+
+  // 🔵 Type 2 (max 14)
+  "Thon": 14,
+  "Morue corallienne": 14,
+  "Hareng géant": 14,
+  "Grouper": 14,
+
+  // 🟣 Type 3 (max 15)
+  "Poisson-globe": 15,
+  "Poisson-lanterne": 15,
+  "Magmafish": 15,
+  "Saumon du Nord": 15
+};
+
 const WARRIOR_SKILLS = [
   "Swords",
   "Knives",
@@ -152,4 +173,64 @@ const TROPHY_POINTS = {
   "Serpent": 120
 };
 
-module.exports = { BOSS_POINTS, FISH_RARITY, WARRIOR_SKILLS, BOSSES, SKILLS, FISH, TROPHIES, TROPHY_POINTS };
+const TRANSLATIONS = {
+
+  // Boss
+  "Eikthyr": "Eikthyr",
+  "The Elder": "L'Ancien",
+  "Bonemass": "Masse d'Os",
+  "Moder": "Moder",
+  "Yagluth": "Yagluth",
+  "The Queen": "La Reine",
+  "Fader": "Fader",
+
+  // Forêt / début
+  "Greydwarf": "Nain gris",
+  "Greydwarf Brute": "Brute naine grise",
+  "Greydwarf Shaman": "Chaman nain gris",
+  "Boar": "Sanglier",
+  "Deer": "Cerf",
+  "Neck": "Neck",
+  "Troll": "Troll",
+
+  // Marais
+  "Draugr": "Draugr",
+  "Draugr Elite": "Élite Draugr",
+  "Skeleton": "Squelette",
+  "Blob": "Gluant",
+  "Ooze": "Limon",
+  "Wraith": "Spectre",
+  "Leech": "Sangsue",
+  "Abomination": "Abomination",
+
+  // Montagnes
+  "Wolf": "Loup",
+  "Fenring": "Fenring",
+  "Ulv": "Ulv",
+  "Stone Golem": "Golem de pierre",
+  "Drake": "Drake",
+
+  // Plaines
+  "Fuling": "Fuling",
+  "Fuling Berserker": "Berserker Fuling",
+  "Fuling Shaman": "Chaman Fuling",
+  "Deathsquito": "Moustique mortel",
+  "Lox": "Lox",
+  "Growth": "Croissance",
+
+  // Mistlands
+  "Seeker": "Chercheur",
+  "Seeker Soldier": "Soldat Chercheur",
+  "Seeker Brood": "Larve Chercheuse",
+  "Gjall": "Gjall",
+  "Tick": "Tique",
+  "Dvergr Rogue": "Dvergr voleur",
+  "Dvergr Mage": "Dvergr mage",
+  "Dvergr Guard": "Dvergr garde",
+
+  // Océan
+  "Serpent": "Serpent",
+  "Leviathan": "Léviathan"
+};
+
+module.exports = { BOSS_POINTS, FISH_RARITY, WARRIOR_SKILLS, BOSSES, SKILLS, FISH, TROPHIES, TROPHY_POINTS, TRANSLATIONS, FISH_QUALITY };

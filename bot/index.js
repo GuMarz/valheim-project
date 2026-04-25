@@ -7,7 +7,7 @@ const {
 } = require('discord.js');
 
 const axios = require('axios');
-const { BOSSES, SKILLS, FISH, TROPHIES } = require('../api/data/constants');
+const { BOSSES, SKILLS, FISH, TROPHIES, TRANSLATIONS, FISH_RARITY, FISH_QUALITY } = require('../api/data/constants');
 const { TOKEN } = require('../token'); // 🔐 token séparé pour sécurité
 
 const client = new Client({
@@ -25,6 +25,36 @@ function getUserId(message) {
   return message.author.id;
 }
 
+function t(name) {
+  return TRANSLATIONS[name] || name;
+}
+
+const REVERSE_TRANSLATIONS = Object.fromEntries(
+  Object.entries(TRANSLATIONS).map(([k, v]) => [v, k])
+);
+
+function tReverse(name) {
+  return REVERSE_TRANSLATIONS[name] || name;
+}
+
+function getFishEmoji(name) {
+  const rarity = FISH_RARITY[name] || 1;
+
+  switch (rarity) {
+    case 1: return "🐟";
+    case 2: return "🐠";
+    case 3: return "🐡";
+    case 4: return "🐉";
+    default: return "🐟";
+  }
+}
+
+function getStars(quality) {
+  const q = Math.max(0, Math.min(5, Math.floor(quality)));
+
+  return "⭐".repeat(q) + "☆".repeat(5 - q);
+}
+
 function formatTrophies(allTrophies, playerTrophies) {
 
   return allTrophies.map(t => {
@@ -32,7 +62,9 @@ function formatTrophies(allTrophies, playerTrophies) {
     const trophy = playerTrophies.find(x => x.nom === t);
     const has = trophy?.obtenu === true;
 
-    return `${has ? "🏆" : "❌"} ${t}`;
+    const name = TRANSLATIONS[t] || t;
+
+    return `${has ? "🏆" : "❌"} ${name}`;
   }).join("\n");
 }
 
@@ -79,6 +111,45 @@ async function ensurePlayer(message) {
   }
 }
 
+async function updateBossMessage(interaction, ownerId) {
+
+  const res = await axios.get(`${API}/${ownerId}`);
+  const player = res.data;
+  const bosses = player.bosses || [];
+
+  const text = BOSSES.map(b => {
+    const found = bosses.find(x => x.nom === b);
+    return `🔥 ${t(b)} : ${found ? found.kills : 0}`;
+  }).join('\n');
+
+  const buttons = BOSSES.flatMap(b => [
+    new ButtonBuilder()
+      .setCustomId(`boss_add_${b}_${ownerId}`)
+      .setLabel(`+ ${t(b)}`)
+      .setStyle(ButtonStyle.Success),
+
+    new ButtonBuilder()
+      .setCustomId(`boss_remove_${b}_${ownerId}`)
+      .setLabel(`-`)
+      .setStyle(ButtonStyle.Danger)
+  ]);
+
+  const rows = [];
+  for (let i = 0; i < buttons.length; i += 5) {
+    rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 5)));
+  }
+
+  return interaction.update({
+    content:
+`🏆 **Boss de ${player.nom} :**
+
+${text}
+━━━━━━━━━━━━━━━━━━━━━━
+⚔️ Quel boss viens-tu de vaincre ?`,
+    components: rows
+  });
+}
+
 client.on('clientReady', () => {
   console.log(`🤖 Bot connecté en tant que ${client.user.tag}`);
 });
@@ -99,7 +170,7 @@ client.on('messageCreate', async (message) => {
 
   const { EmbedBuilder } = require('discord.js');
 
-  if (content === '!score') {
+  if (content === '!sb') {
 
     const id = message.author.id;
 
@@ -143,19 +214,19 @@ client.on('messageCreate', async (message) => {
 
   ━━━━━━━━━━━━━━━━━━━━━━
 
-  ☠️ **DEATHS**
+  ☠️ **MORTS**
   ━━━━━━━━━━━━━━━━━━━━━━
   ${format(deaths, true)}
 
   ━━━━━━━━━━━━━━━━━━━━━━
 
-  🎣 **FISHING**
+  🎣 **PECHES**
   ━━━━━━━━━━━━━━━━━━━━━━
   ${format(fishing)}
 
   ━━━━━━━━━━━━━━━━━━━━━━
 
-  ⚔️ **WARRIOR**
+  ⚔️ **GUERRIER**
   ━━━━━━━━━━━━━━━━━━━━━━
   ${format(warrior)}
 
@@ -177,95 +248,113 @@ client.on('messageCreate', async (message) => {
         👤 PROFIL
     ========================= */
 
-    if (content === '!profil') {
-      const res = await axios.get(`${API}/${id}`);
-      const p = res.data;
+if (content === '!pf') {
+  const res = await axios.get(`${API}/${id}`);
+  const p = res.data;
 
-      const score = p.stats.scoreGlobal;
+  const score = p.stats.scoreGlobal;
 
-      const title = getTitle(score);
-      const name = getNameDecoration(score, p.nom);
-      const color = getBackgroundColor(score);
+  const title = getTitle(score);
+  const name = getNameDecoration(score, p.nom);
+  const color = getBackgroundColor(score);
 
-      const embed = new EmbedBuilder()
-        .setColor(color)
-        .setTitle(`${title}`)
-        .setDescription(`👤 **${name}**`)
-        .addFields(
-          { name: "🏆 Général", value: `#${p.rankings.general} — ${p.stats.scoreGlobal}pts`, inline: true },
-          { name: "⚔️ Warrior", value: `#${p.rankings.warrior} — ${p.stats.scoreWarrior}pts`, inline: true },
-          { name: "🎣 Fishing", value: `#${p.rankings.fishing} — ${p.stats.scoreFishing}pts`, inline: true },
-          { name: "☠️ Deaths", value: `#${p.rankings.deaths} — ${p.stats.deaths}`, inline: true },
-          { name: "🧭 Exploration", value: `#${p.rankings.exploration} — ${p.stats.exploration}%`, inline: true },
-          { name: "🏆 Trophies", value: `#${p.rankings.trophies} — ${p.stats.trophiesCount}%`, inline: true }
-        )
-        .setFooter({ text: `Score total : ${score}` })
-        .setTimestamp();
+  const embed = new EmbedBuilder()
+    .setColor(color)
+    .setTitle(`${title}`)
+    .setDescription(`👤 **${name}**`)
+    .addFields(
+      { name: "🏆 Général", value: `#${p.rankings.general} — ${Number(p.stats.scoreGlobal).toFixed(2)} pts`, inline: true },
+      { name: "⚔️ Guerrier", value: `#${p.rankings.warrior} — ${Number(p.stats.scoreWarrior).toFixed(2)} pts`, inline: true },
+      { name: "🎣 Pêche", value: `#${p.rankings.fishing} — ${Number(p.stats.scoreFishing).toFixed(2)} pts`, inline: true },
+      { name: "☠️ Morts", value: `#${p.rankings.deaths} — ${Number(p.stats.deaths).toFixed(2)}`, inline: true },
+      { name: "🧭 Exploration", value: `#${p.rankings.exploration} — ${Number(p.stats.exploration).toFixed(2)}%`, inline: true },
+      { name: "🏆 Trophées", value: `#${p.rankings.trophies} — ${Number(p.stats.trophiesCount).toFixed(2)}%`, inline: true }
+    )
+    .setFooter({ text: `Score total : ${Number(score).toFixed(2)}` })
+    .setTimestamp();
 
-      return message.channel.send({ embeds: [embed] });
-    }
-
-    /* =========================
-        🎣 FISH / SKILLS / TROPHIES
-    ========================= */
-
-    if (content === '!trophies') {
-      const res = await axios.get(`${API}/${id}/trophies`);
-
-      const text = res.data.trophies
-        .map(t => `🏆 ${t.nom}`)
-        .join("\n");
-
-      return message.channel.send(`🏆 Trophées (${res.data.count})\n` + text);
-    }
+  return message.channel.send({ embeds: [embed] });
+}
 
     /* =========================
         🔥 POST COMMANDS
     ========================= */
 
-    if (content === '!boss') {
+    if (content === '!b') {
 
       const res = await axios.get(`${API}/${id}`);
-      const bosses = res.data.bosses || [];
+      const player = res.data;
+      const bosses = player.bosses || [];
 
       // 🧾 texte des boss
       const text = BOSSES.map(b => {
         const found = bosses.find(x => x.nom === b);
-        return `🔥 ${b} : ${found ? found.kills : 0}`;
+        return `🔥 ${t(b)} : ${found ? found.kills : 0}`;
       }).join('\n');
 
       // 🔘 boutons
-      const buttons = BOSSES.map(b =>
+      const buttons = BOSSES.flatMap(b => [
         new ButtonBuilder()
-          .setCustomId(`boss_${b}_${id}`) // 🔥 on ajoute l'id joueur
-          .setLabel(b)
-          .setStyle(ButtonStyle.Primary)
-      );
+          .setCustomId(`boss_add_${b}_${id}`)
+          .setLabel(`+ ${t(b)}`)
+          .setStyle(ButtonStyle.Success),
 
-      // Discord limite = 5 boutons par ligne
+        new ButtonBuilder()
+          .setCustomId(`boss_remove_${b}_${id}`)
+          .setLabel(`-`)
+          .setStyle(ButtonStyle.Danger)
+          .setStyle(ButtonStyle.Danger)
+      ]);
+
       const rows = [];
+
       for (let i = 0; i < buttons.length; i += 5) {
         rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 5)));
       }
 
       return message.channel.send({
-        content: `🏆 **Tes boss :**\n\n${text}`,
+        content:
+    `🏆 **Boss de ${player.nom} :**
+
+${text}
+━━━━━━━━━━━━━━━━━━━━━━
+⚔️ Quel boss viens-tu de vaincre ?`,
         components: rows
       });
     }
 
-    if (content === '!fish') {
+    if (content === '!p') {
 
       const res = await axios.get(`${API}/${id}`);
       const player = res.data;
 
       const fish = player.fish || [];
-      const fishLevel = player.skills?.find(s => s.nom === "Fishing")?.niveau || 0;
+      const fishLevel = player.fishingLevel || 0;
 
-      const fishText = fish.length > 0
-        ? fish.map(f => `🐟 ${f.nom} | Q:${f.qualité}`).join('\n')
-        : "Aucun poisson";
+const fishText = fish.length > 0
+  ? fish
+      .slice()
+      .sort((a, b) => {
+        const rarityA = FISH_RARITY[a.nom] || 1;
+        const rarityB = FISH_RARITY[b.nom] || 1;
 
+        // 🔥 rareté d'abord (du plus rare au plus commun)
+        if (rarityB !== rarityA) return rarityB - rarityA;
+
+        // 🔥 puis qualité (du meilleur au pire)
+        return b.qualité - a.qualité;
+      })
+      .map(f => {
+        const emoji = getFishEmoji(f.nom);
+
+        const maxQuality = FISH_QUALITY[f.nom] || 15;
+        const qualityRate = Math.floor((f.qualité / maxQuality) * 5);
+        const stars = getStars(qualityRate);
+
+        return `${emoji} ${f.nom.padEnd(22)} ${stars}`;
+      })
+      .join('\n')
+  : "Aucun poisson";
       const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
       const row = new ActionRowBuilder().addComponents(
@@ -278,22 +367,30 @@ client.on('messageCreate', async (message) => {
           .setCustomId(`fish_edit_${id}`)
           .setLabel("✏️ Modifier poisson")
           .setStyle(ButtonStyle.Primary),
+
+        new ButtonBuilder()
+          .setCustomId(`fish_level_${id}`)
+          .setLabel("📊 Niveau pêche")
+          .setStyle(ButtonStyle.Secondary)
       );
 
+      const uniqueFish = new Set(fish.map(f => f.nom)).size;
+      const totalFish = FISH.length;
+      
       return message.channel.send({
         content:
-    `🎣 **Fishing**
-    ${player.nom}
+    `🎣 **Pêche de ${player.nom}**
+━━━━━━━━━━━━━━━━━━━━━━
+📊 Niveau pêche : ${fishLevel}
+🐟 Collection : ${uniqueFish} / ${totalFish}
 
-    📊 Niveau pêche : ${fishLevel}
-
-    🐟 Poissons :
-    ${fishText}`,
+Inventaire :
+${fishText}`,
         components: [row]
       });
     }
 
-    if (content === '!trophy') {
+    if (content === '!t') {
 
       const res = await axios.get(`${API}/${id}`);
       const player = res.data;
@@ -315,9 +412,66 @@ client.on('messageCreate', async (message) => {
         content:
     `🏆 **Trophées de ${player.nom}**
 
-    ${text}`,
+${text}`,
         components: [row]
       });
+    }
+
+    if (content === '!rules') {
+
+      return message.channel.send(
+    `📜 **Règles des Classements & Exploits**
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚔️ **GUERRIER**
+    • Boss vaincus
+    • Compétences de combat (Swords, Axes, Bows, etc.)
+    🏆 Titre : **"L'aplatisseur"**
+    ━━━━━━━━━━━━━━━━━━━━━━
+    🎣 **PÊCHE**
+    • Rareté du poisson
+    • Qualité du poisson
+    ➡️ Multiplié par le niveau de pêche
+    🏆 Titre : **"Plus de poissons que d’amis"**
+    ━━━━━━━━━━━━━━━━━━━━━━
+    🧭 **EXPLORATION**
+    • Pourcentage de carte découvert
+    📸 Screenshot obligatoire comme preuve
+    🏆 Titre : **"Moi perdu ? Jamais !"**
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ☠️ **MORTS**
+    • Nombre de morts total
+    ⚠️ Malus sur le score global
+
+    🏆 Titre selon classement :
+    • 🥇 Premier : **"J’ai oublié de mourir"**
+    • 💀 Dernier : **"J’ai visité le Valhalla plus que mon inventaire"**
+    ━━━━━━━━━━━━━━━━━━━━━━
+    🏅 **EXPLOITS**
+
+    • 🏆 Tous les trophées obtenus  
+    → **"J’ai tout tué (même les trucs moches)"** +500 pts
+
+    • 🎣 Tous les types de poissons pêchés  
+    → **"Attrape-Tout"** +500 pts
+
+    • ⚔️ Boss vaincu sans arme ni armure  
+    → **"Le Berserker"** +500 pts
+
+    • 🏠 Plus belle construction (vote communautaire)  
+    → **"Maître IKEA"** +500 pts
+    ━━━━━━━━━━━━━━━━━━━━━━
+    Dédfi hebdomadaire 
+    🥇 1er : +300 pts
+    🥈 2e : +200 pts
+    🥉 3e : +100 pts
+    ━━━━━━━━━━━━━━━━━━━━━━
+    🏆 **CLASSEMENT GÉNÉRAL**
+    • Somme de tous les classements
+     + Exploits
+     + Défi hebdomadaire
+
+    👑 Titre ultime : **"La Légende"**`
+      );
     }
 
 
@@ -327,15 +481,17 @@ client.on('messageCreate', async (message) => {
     `📜 **Valheim Bot - Commandes**
 
     ━━━━━━━━━━━━━━━━━━━━━━
-    !score → Tous les classements
+    !sb → Tous les classements
     ━━━━━━━━━━━━━━━━━━━━━━
-    !profil → Ton profil joueur
+    !pf → Ton profil joueur
     ━━━━━━━━━━━━━━━━━━━━━━
-    !boss → Afficher + ajouter des boss
+    !b → Afficher + ajouter des boss
     ━━━━━━━━━━━━━━━━━━━━━━
-    !fish → Menu pêche
+    !p → Menu pêche + ajouter des poissons
     ━━━━━━━━━━━━━━━━━━━━━━
-    !trophies → Voir tes trophées
+    !t → Voir tes trophées + ajouter des poissons
+    ━━━━━━━━━━━━━━━━━━━━━━
+    !rules → Règles de chaque classement, exploit et défis
     ━━━━━━━━━━━━━━━━━━━━━━
     !help → Affiche cette aide
     ━━━━━━━━━━━━━━━━━━━━━━`
@@ -366,7 +522,7 @@ client.on('interactionCreate', async (interaction) => {
 
       try {
         await axios.post(`${API}/${ownerId}/trophies`, {
-          nom: trophyName,
+          nom: tReverse(trophyName),
           obtenu: true
         });
 
@@ -397,39 +553,88 @@ client.on('interactionCreate', async (interaction) => {
         });
       }
     }
-  }
-  
-  if (!interaction.isButton()) return;
 
-  const customId = interaction.customId;
-  
-  /* =========================
-        🔥 BOSSES
-  ========================= */
-  if (customId.startsWith('boss_') && !customId.startsWith('boss_page_')) {
+  if (customId.startsWith('fish_level_modal_')) {
 
-    const parts = customId.split('_');
-    const boss = parts[1];
-    const ownerId = parts[2];
+  const ownerId = customId.split('_')[3];
 
-    if (interaction.user.id !== ownerId) {
-      return interaction.reply({ content: "❌ Ce bouton n'est pas pour toi !", flags: 64 });
+  if (interaction.user.id !== ownerId) {
+      return interaction.reply({ content: "❌ Pas ton menu", flags: 64 });
+    }
+
+    const level = parseInt(interaction.fields.getTextInputValue('fish_level'));
+
+    if (isNaN(level)) {
+      return interaction.reply({ content: "❌ Niveau invalide", flags: 64 });
     }
 
     try {
-      await axios.post(`${API}/${ownerId}/boss`, { nom: boss });
+      await axios.post(`${API}/${ownerId}/skills`, {
+          "nom": "Fishing",
+          "niveau": level
+      });
 
       const res = await axios.get(`${API}/${ownerId}`);
-      const bosses = res.data.bosses || [];
+      const player = res.data;
 
-      const text = BOSSES.map(b => {
-        const found = bosses.find(x => x.nom === b);
-        return `🔥 ${b} : ${found ? found.kills : 0}`;
-      }).join('\n');
+      const fish = player.fish || [];
+      const fishLevel = player.fishingLevel || 0;
+
+const fishText = fish.length > 0
+  ? fish
+      .slice()
+      .sort((a, b) => {
+        const rarityA = FISH_RARITY[a.nom] || 1;
+        const rarityB = FISH_RARITY[b.nom] || 1;
+
+        // 🔥 rareté d'abord (du plus rare au plus commun)
+        if (rarityB !== rarityA) return rarityB - rarityA;
+
+        // 🔥 puis qualité (du meilleur au pire)
+        return b.qualité - a.qualité;
+      })
+      .map(f => {
+        const emoji = getFishEmoji(f.nom);
+
+        const maxQuality = FISH_QUALITY[f.nom] || 15;
+        const qualityRate = Math.floor((f.qualité / maxQuality) * 5);
+        const stars = getStars(qualityRate);
+
+        return `${emoji} ${f.nom.padEnd(22)} ${stars}`;
+      })
+      .join('\n')
+  : "Aucun poisson";
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`fish_add_${ownerId}`)
+          .setLabel("➕ Ajouter poisson")
+          .setStyle(ButtonStyle.Success),
+
+        new ButtonBuilder()
+          .setCustomId(`fish_edit_${ownerId}`)
+          .setLabel("✏️ Modifier poisson")
+          .setStyle(ButtonStyle.Primary),
+
+        new ButtonBuilder()
+          .setCustomId(`fish_level_${ownerId}`)
+          .setLabel("📊 Niveau pêche")
+          .setStyle(ButtonStyle.Secondary)
+      );
+
+      const uniqueFish = new Set(fish.map(f => f.nom)).size;
+      const totalFish = FISH.length;
 
       return interaction.update({
-        content: `🏆 **Tes boss :**\n\n${text}`,
-        components: interaction.message.components
+        content:
+  `🎣 **Pêche de ${player.nom}**
+━━━━━━━━━━━━━━━━━━━━━━
+📊 Niveau pêche : ${fishLevel}
+🐟 Collection : ${uniqueFish} / ${totalFish}
+
+Inventaire :
+${fishText}`,
+        components: [row]
       });
 
     } catch (err) {
@@ -437,6 +642,84 @@ client.on('interactionCreate', async (interaction) => {
       return interaction.reply({ content: "❌ Erreur API", flags: 64 });
     }
   }
+
+  }
+  
+  if (!interaction.isButton()) return;
+
+  const customId = interaction.customId;
+  
+
+  if (customId.startsWith('fish_level_')) {
+
+    const ownerId = customId.split('_')[2];
+
+    if (interaction.user.id !== ownerId) {
+      return interaction.reply({ content: "❌ Pas ton menu", flags: 64 });
+    }
+
+    const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+
+    const modal = new ModalBuilder()
+      .setCustomId(`fish_level_modal_${ownerId}`)
+      .setTitle("📊 Niveau de pêche");
+
+    const input = new TextInputBuilder()
+      .setCustomId('fish_level')
+      .setLabel("Nouveau niveau de pêche")
+      .setStyle(TextInputStyle.Short)
+      .setRequired(true);
+
+    modal.addComponents(
+      new ActionRowBuilder().addComponents(input)
+    );
+
+    return interaction.showModal(modal);
+  }
+  /* =========================
+        🔥 BOSSES
+  ========================= */
+    if (customId.startsWith('boss_add_')) {
+
+      const parts = customId.split('_');
+      const boss = parts[2];
+      const ownerId = parts[3];
+
+      if (interaction.user.id !== ownerId) {
+        return interaction.reply({ content: "❌ Pas ton menu", flags: 64 });
+      }
+
+      try {
+        await axios.post(`${API}/${ownerId}/boss`, { nom: boss });
+
+        return updateBossMessage(interaction, ownerId);
+
+      } catch (err) {
+        console.error(err);
+        return interaction.reply({ content: "❌ Erreur API", flags: 64 });
+      }
+    }
+
+    if (customId.startsWith('boss_remove_')) {
+
+      const parts = customId.split('_');
+      const boss = parts[2];
+      const ownerId = parts[3];
+
+      if (interaction.user.id !== ownerId) {
+        return interaction.reply({ content: "❌ Pas ton menu", flags: 64 });
+      }
+
+      try {
+        await axios.post(`${API}/${ownerId}/boss/remove`, { nom: boss });
+
+        return updateBossMessage(interaction, ownerId);
+
+      } catch (err) {
+        console.error(err);
+        return interaction.reply({ content: "❌ Erreur API", flags: 64 });
+      }
+    }
 
   /* =========================
         🎣 ADD FISH MENU
@@ -487,8 +770,9 @@ client.on('interactionCreate', async (interaction) => {
     const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
     const buttons = [];
+    const maxQuality = FISH_QUALITY[fishName] || 15;
 
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= maxQuality; i++) {
       buttons.push(
         new ButtonBuilder()
           .setCustomId(`fish_quality_${ownerId}_${encodeURIComponent(fishName)}_${i}`)
@@ -503,7 +787,8 @@ client.on('interactionCreate', async (interaction) => {
     }
 
     return interaction.update({
-      content: `🔢 Qualité de **${fishName}**`,
+      content: `🔢 Qualité de **${fishName}**
+(Correspond à la quantité de poisson crue qu'il donne))`,
       components: rows
     });
   }
@@ -532,11 +817,32 @@ client.on('interactionCreate', async (interaction) => {
       const player = res.data;
 
       const fish = player.fish || [];
-      const fishLevel = player.skills?.find(s => s.nom === "Fishing")?.niveau || 0;
+      const fishLevel = player.fishingLevel || 0;
 
-      const fishText = fish.length
-        ? fish.map(f => `🐟 ${f.nom} | Q:${f.qualité}`).join('\n')
-        : "Aucun poisson";
+const fishText = fish.length > 0
+  ? fish
+      .slice()
+      .sort((a, b) => {
+        const rarityA = FISH_RARITY[a.nom] || 1;
+        const rarityB = FISH_RARITY[b.nom] || 1;
+
+        // 🔥 rareté d'abord (du plus rare au plus commun)
+        if (rarityB !== rarityA) return rarityB - rarityA;
+
+        // 🔥 puis qualité (du meilleur au pire)
+        return b.qualité - a.qualité;
+      })
+      .map(f => {
+        const emoji = getFishEmoji(f.nom);
+
+        const maxQuality = FISH_QUALITY[f.nom] || 15;
+        const qualityRate = Math.floor((f.qualité / maxQuality) * 5);
+        const stars = getStars(qualityRate);
+
+        return `${emoji} ${f.nom.padEnd(22)} ${stars}`;
+      })
+      .join('\n')
+  : "Aucun poisson";
 
       const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
@@ -552,13 +858,17 @@ client.on('interactionCreate', async (interaction) => {
           .setStyle(ButtonStyle.Primary)
       );
 
+      const uniqueFish = new Set(fish.map(f => f.nom)).size;
+      const totalFish = FISH.length;
+
       return interaction.update({
         content:
-`🎣 **Fishing**
-
+`🎣 **Pêche de ${player.nom}**
+━━━━━━━━━━━━━━━━━━━━━━
 📊 Niveau pêche : ${fishLevel}
+🐟 Collection : ${uniqueFish} / ${totalFish}
 
-🐟 Poissons :
+Inventaire :
 ${fishText}`,
         components: [row]
       });
@@ -668,11 +978,32 @@ ${fishText}`,
       const player = res.data;
 
       const fish = player.fish || [];
-      const fishLevel = player.skills?.find(s => s.nom === "Fishing")?.niveau || 0;
+      const fishLevel = player.fishingLevel || 0;
 
-      const fishText = fish.length
-        ? fish.map(f => `🐟 ${f.nom} | Q:${f.qualité}`).join('\n')
-        : "Aucun poisson";
+const fishText = fish.length > 0
+  ? fish
+      .slice()
+      .sort((a, b) => {
+        const rarityA = FISH_RARITY[a.nom] || 1;
+        const rarityB = FISH_RARITY[b.nom] || 1;
+
+        // 🔥 rareté d'abord (du plus rare au plus commun)
+        if (rarityB !== rarityA) return rarityB - rarityA;
+
+        // 🔥 puis qualité (du meilleur au pire)
+        return b.qualité - a.qualité;
+      })
+      .map(f => {
+        const emoji = getFishEmoji(f.nom);
+
+        const maxQuality = FISH_QUALITY[f.nom] || 15;
+        const qualityRate = Math.floor((f.qualité / maxQuality) * 5);
+        const stars = getStars(qualityRate);
+
+        return `${emoji} ${f.nom.padEnd(22)} ${stars}`;
+      })
+      .join('\n')
+  : "Aucun poisson";
 
       const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
@@ -688,13 +1019,17 @@ ${fishText}`,
           .setStyle(ButtonStyle.Primary)
       );
 
+      const uniqueFish = new Set(fish.map(f => f.nom)).size;
+      const totalFish = FISH.length;
+
       return interaction.update({
         content:
-`🎣 **Fishing mis à jour**
-
+`🎣 **Pêche de ${player.nom}**
+━━━━━━━━━━━━━━━━━━━━━━
 📊 Niveau pêche : ${fishLevel}
+🐟 Collection : ${uniqueFish} / ${totalFish}
 
-🐟 Poissons :
+Inventaire :
 ${fishText}`,
         components: [row]
       });

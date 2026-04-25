@@ -151,6 +151,7 @@ app.get('/:id', (req, res) => {
     bosses: player.bosses,
     fish: player.fish,
     trophies: player.trophies,
+    fishingLevel: player.skills?.find(s => s.nom === "Fishing")?.niveau || 0,
 
     rankings,
 
@@ -262,6 +263,34 @@ app.post('/:id/boss', (req, res) => {
   }
 
   boss.kills += 1;
+
+  saveDB(db);
+  res.json({ success: true });
+});
+
+app.post('/:id/boss/remove', (req, res) => {
+  const { nom } = req.body;
+
+  if (!BOSSES.includes(nom)) {
+    return res.status(400).json({
+      error: "Boss invalide"
+    });
+  }
+
+  const db = readDB();
+  const player = db.players.find(p => p.id === req.params.id);
+  if (!player) return res.status(404).json({ error: "Not found" });
+
+  player.bosses = player.bosses || [];
+
+  let boss = player.bosses.find(b => b.nom === nom);
+
+  if (!boss) {
+    boss = { nom, kills: 0 };
+    player.bosses.push(boss);
+  }
+
+  boss.kills -= 1;
 
   saveDB(db);
   res.json({ success: true });

@@ -203,7 +203,24 @@
       "deaths": 0,
       "scoreGlobal": 0,
       "exploration": 0,
-      "bosses": [],
+      "bosses": [
+        {
+          "nom": "Eikthyr",
+          "kills": 0
+        },
+        {
+          "nom": "The Elder",
+          "kills": 0
+        },
+        {
+          "nom": "Bonemass",
+          "kills": 0
+        },
+        {
+          "nom": "Fader",
+          "kills": 0
+        }
+      ],
       "skills": [
         {
           "nom": "Swords",
@@ -239,10 +256,51 @@
         },
         {
           "nom": "Fishing",
-          "niveau": 1
+          "niveau": 16
         }
       ],
-      "fish": [],
+      "fish": [
+        {
+          "nom": "Poisson-globe",
+          "qualité": 14
+        },
+        {
+          "nom": "Brochet",
+          "qualité": 15
+        },
+        {
+          "nom": "Poisson-lanterne",
+          "qualité": 14
+        },
+        {
+          "nom": "Tetra",
+          "qualité": 9
+        },
+        {
+          "nom": "Grouper",
+          "qualité": 14
+        },
+        {
+          "nom": "Perche",
+          "qualité": 14
+        },
+        {
+          "nom": "Thon",
+          "qualité": 15
+        },
+        {
+          "nom": "Morue corallienne",
+          "qualité": 15
+        },
+        {
+          "nom": "Saumon du Nord",
+          "qualité": 14
+        },
+        {
+          "nom": "Magmafish",
+          "qualité": 8
+        }
+      ],
       "trophies": [
         {
           "nom": "Eikthyr",
@@ -258,7 +316,7 @@
         },
         {
           "nom": "Moder",
-          "obtenu": false
+          "obtenu": true
         },
         {
           "nom": "Yagluth",
@@ -390,11 +448,11 @@
         },
         {
           "nom": "Gjall",
-          "obtenu": false
+          "obtenu": true
         },
         {
           "nom": "Tick",
-          "obtenu": false
+          "obtenu": true
         },
         {
           "nom": "Dvergr Rogue",
@@ -410,11 +468,11 @@
         },
         {
           "nom": "Serpent",
-          "obtenu": false
+          "obtenu": true
         },
         {
           "nom": "Leviathan",
-          "obtenu": false
+          "obtenu": true
         }
       ],
       "maison": []
